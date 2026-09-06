@@ -1,0 +1,89 @@
+name: Purego Tests
+on:
+  pull_request:
+    paths:
+      - "internal/driver/purego/**"
+      - "internal/painter/software/**"
+      - "internal/animation/**"
+      - "internal/driver/menu/**"
+      - "app/app_purego.go"
+      - "app/app_purego_systray_test.go"
+      - "app/app_gl.go"
+      - ".github/workflows/purego_tests.yml"
+  push:
+    branches: [develop]
+    paths:
+      - "internal/driver/purego/**"
+      - "internal/painter/software/**"
+      - "internal/animation/**"
+      - "internal/driver/menu/**"
+      - "app/app_purego.go"
+      - "app/app_purego_systray_test.go"
+      - "app/app_gl.go"
+      - ".github/workflows/purego_tests.yml"
+permissions:
+  contents: read
+
+jobs:
+  x11:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "stable"
+      - name: Get dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends xvfb
+      - name: Build without CGo
+        run: CGO_ENABLED=0 go build -tags purego ./app/ ./internal/driver/purego/
+      - name: Vet
+        run: |
+          go vet -tags purego ./app/ ./internal/driver/purego/
+          go vet -tags purego,ci ./app/ ./internal/driver/purego/
+      - name: Smoke-run fyne_demo without CGo under xvfb
+        run: |
+          CGO_ENABLED=0 go build -tags purego -o /tmp/fyne_demo ./cmd/fyne_demo
+          set +e
+          timeout 8 xvfb-run -a /tmp/fyne_demo
+          rc=$?
+          set -e
+          test "$rc" -eq 124 || { echo "fyne_demo exited with $rc before the timeout"; exit 1; }
+      - name: Tests
+        run: xvfb-run -a -s "-screen 0 1280x800x24 -noreset" go test -race -tags purego,ci ./internal/driver/purego/
+
+  wayland:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "stable"
+      - name: Get dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends cage
+      - name: Wayland tests
+        run: |
+          export XDG_RUNTIME_DIR="${RUNNER_TEMP}/xdg-runtime"
+          mkdir -p "$XDG_RUNTIME_DIR"
+          chmod 700 "$XDG_RUNTIME_DIR"
+          WLR_BACKENDS=headless cage -- sleep infinity &
+          cage_pid=$!
+          trap 'kill "$cage_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 50); do
+            if [ -S "$XDG_RUNTIME_DIR/wayland-0" ]; then
+              break
+            fi
+            sleep 0.1
+          done
+          if [ ! -S "$XDG_RUNTIME_DIR/wayland-0" ]; then
+            echo "cage did not create $XDG_RUNTIME_DIR/wayland-0"
+            exit 1
+          fi
+          WAYLAND_DISPLAY=wayland-0 go test -race -tags purego,ci -run Wayland ./internal/driver/purego/
