@@ -2,6 +2,7 @@ package glfw
 
 import (
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/internal/driver/menu"
 )
 
 func buildMenuOverlay(menus *fyne.MainMenu, w *window) fyne.CanvasObject {
@@ -11,5 +12,5 @@ func buildMenuOverlay(menus *fyne.MainMenu, w *window) fyne.CanvasObject {
 	}
 
 	menus = addMissingQuitForMainMenu(menus, w)
-	return NewMenuBar(menus, w.canvas)
+	return menu.NewMenuBar(menus, w.canvas)
 }

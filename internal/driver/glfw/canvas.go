@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/internal/build"
 	"fyne.io/fyne/v2/internal/driver"
 	"fyne.io/fyne/v2/internal/driver/common"
+	"fyne.io/fyne/v2/internal/driver/menu"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -51,8 +52,8 @@ func (c *glCanvas) Content() fyne.CanvasObject {
 }
 
 func (c *glCanvas) DismissMenu() bool {
-	if c.menu != nil && c.menu.(*MenuBar).IsActive() {
-		c.menu.(*MenuBar).Toggle()
+	if c.menu != nil && c.menu.(*menu.MenuBar).IsActive() {
+		c.menu.(*menu.MenuBar).Toggle()
 		return true
 	}
 	return false
@@ -118,15 +119,15 @@ func (c *glCanvas) Resize(size fyne.Size) {
 	content := c.content
 	contentSize := c.contentSize(nearestSize)
 	contentPos := c.contentPos()
-	menu := c.menu
+	bar := c.menu
 	menuHeight := c.menuHeight()
 
 	content.Resize(contentSize)
 	content.Move(contentPos)
 
-	if menu != nil {
-		menu.Refresh()
-		menu.Resize(fyne.NewSize(nearestSize.Width, menuHeight))
+	if bar != nil {
+		bar.Refresh()
+		bar.Resize(fyne.NewSize(nearestSize.Width, menuHeight))
 	}
 }
 
@@ -184,7 +185,7 @@ func (c *glCanvas) Size() fyne.Size {
 
 func (c *glCanvas) ToggleMenu() {
 	if c.menu != nil {
-		c.menu.(*MenuBar).Toggle()
+		c.menu.(*menu.MenuBar).Toggle()
 	}
 }
 

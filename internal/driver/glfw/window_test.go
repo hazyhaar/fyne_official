@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/driver/menu"
 	"fyne.io/fyne/v2/internal/scale"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/layout"
@@ -111,7 +112,7 @@ func TestWindow_ToggleMainMenuByKeyboard(t *testing.T) {
 	w := createWindow("Test")
 	c := w.Canvas()
 	m := fyne.NewMainMenu(fyne.NewMenu("File"), fyne.NewMenu("Edit"), fyne.NewMenu("Help"))
-	menuBar := buildMenuOverlay(m, w.window).(*MenuBar)
+	menuBar := buildMenuOverlay(m, w.window).(*menu.MenuBar)
 	c.setMenuOverlay(menuBar)
 	w.SetContent(canvas.NewRectangle(color.Black))
 
@@ -1241,8 +1242,8 @@ func TestWindow_TappedSecondary_RedispatchAfterOverlayDismiss(t *testing.T) {
 	w.SetContent(o)
 	ensureCanvasSize(t, w, fyne.NewSize(108, 108))
 
-	menu := fyne.NewMenu("", fyne.NewMenuItem("A", nil))
-	pop := widget.NewPopUpMenu(menu, w.canvas)
+	items := fyne.NewMenu("", fyne.NewMenuItem("A", nil))
+	pop := widget.NewPopUpMenu(items, w.canvas)
 
 	runOnMain(func() {
 		pop.ShowAtPosition(fyne.NewPos(0, 0))

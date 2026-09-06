@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/build"
+	"fyne.io/fyne/v2/internal/driver/menu"
 	internalTest "fyne.io/fyne/v2/internal/test"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -542,7 +543,7 @@ func TestGlCanvas_SetContent(t *testing.T) {
 		menuHeight = 0
 	} else {
 		runOnMain(func() {
-			menuHeight = NewMenuBar(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Empty", func() {}))), nil).MinSize().Height
+			menuHeight = menu.NewMenuBar(fyne.NewMainMenu(fyne.NewMenu("Test", fyne.NewMenuItem("Empty", func() {}))), nil).MinSize().Height
 		})
 	}
 	tests := []struct {

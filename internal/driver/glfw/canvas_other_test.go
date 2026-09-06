@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/internal/driver/menu"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -30,7 +31,7 @@ func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T)
 	w.SetContent(content)
 
 	assert.Nil(t, c.Focused())
-	m := c.menu.(*MenuBar)
+	m := c.menu.(*menu.MenuBar)
 	assert.False(t, m.IsActive())
 
 	c.FocusPrevious()
@@ -38,7 +39,7 @@ func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T)
 	assert.True(t, ce2.focused)
 
 	runOnMain(func() {
-		m.Items[0].(*menuBarItem).Tapped(&fyne.PointEvent{})
+		m.Items[0].(fyne.Tappable).Tapped(&fyne.PointEvent{})
 	})
 	assert.True(t, m.IsActive())
 	ctxt := "activating the menu changes focus handler and focuses the menu bar item but does not remove focus from content"
@@ -51,7 +52,7 @@ func TestGlCanvas_FocusHandlingWhenActivatingOrDeactivatingTheMenu(t *testing.T)
 	assert.Equal(t, m.Items[1], c.Focused(), ctxt)
 
 	runOnMain(func() {
-		m.Items[0].(*menuBarItem).Tapped(&fyne.PointEvent{})
+		m.Items[0].(fyne.Tappable).Tapped(&fyne.PointEvent{})
 	})
 	assert.False(t, m.IsActive())
 	ctxt = "deactivating the menu restores focus handler from content"

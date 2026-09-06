@@ -1,6 +1,6 @@
-//go:build !mobile && !no_glfw && !windows
+//go:build !mobile && !windows
 
-package glfw
+package menu
 
 import (
 	"image"
@@ -570,4 +570,8 @@ func newNotFocusableButton(l string, f func()) *notFocusableButton {
 
 func (n *notFocusableButton) Tapped(*fyne.PointEvent) {
 	n.f()
+}
+
+func runOnMain(f func()) {
+	f()
 }

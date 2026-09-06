@@ -1,4 +1,4 @@
-package glfw
+package menu
 
 import (
 	"fyne.io/fyne/v2"

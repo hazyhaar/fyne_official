@@ -1,16 +1,16 @@
 <canvas size="300x300">
 	<content>
 		<container size="300x300">
-			<widget size="300x27" type="*glfw.MenuBar">
-				<widget size="300x300" type="*glfw.menuBarUnderlay">
+			<widget size="300x27" type="*menu.MenuBar">
+				<widget size="300x300" type="*menu.menuBarUnderlay">
 				</widget>
 				<rectangle fillColor="background" shadowBlurRadius="2" shadowColor="shadow" shadowOffset="0,1" size="300x27"/>
 				<container pos="8,0" size="284x27">
-					<widget size="38x27" type="*glfw.menuBarItem">
+					<widget size="38x27" type="*menu.menuBarItem">
 						<rectangle fillColor="focus" radius="4" size="38x27"/>
 						<text pos="8,4" size="22x19">File</text>
 					</widget>
-					<widget pos="42,0" size="41x27" type="*glfw.menuBarItem">
+					<widget pos="42,0" size="41x27" type="*menu.menuBarItem">
 						<text pos="8,4" size="25x19">Edit</text>
 					</widget>
 				</container>
