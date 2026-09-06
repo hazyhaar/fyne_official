@@ -86,6 +86,15 @@ func (r *Runner) Stop(a *fyne.Animation) {
 	r.pendingAnimations = newList
 }
 
+// Running reports whether the runner still has animations to tick.
+// Drivers arm a frame timer only while this is true, so an idle
+// application does not wake the main loop on a fixed interval.
+func (r *Runner) Running() bool {
+	r.animationMutex.RLock()
+	defer r.animationMutex.RUnlock()
+	return r.runnerStarted
+}
+
 // TickAnimations progresses all running animations by one tick.
 // This will be called from the driver to update objects immediately before next paint.
 func (r *Runner) TickAnimations() {
