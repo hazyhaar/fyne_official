@@ -72,3 +72,76 @@ func (*Painter) Paint(c fyne.Canvas) image.Image {
 
 	return base
 }
+
+// PaintRegion walks the canvas object tree like Paint but draws only objects
+// whose screen bounds intersect region, clipping each object's draw to
+// region. The caller fills the region's background before calling. base is
+// the retained frame and is left unchanged outside region.
+func (*Painter) PaintRegion(c fyne.Canvas, base *image.NRGBA, region image.Rectangle) {
+	if base == nil || c == nil {
+		return
+	}
+	region = region.Intersect(base.Bounds())
+	if region.Empty() {
+		return
+	}
+
+	paint := func(obj fyne.CanvasObject, pos, clipPos fyne.Position, clipSize fyne.Size) bool {
+		objBounds := image.Rect(
+			scale.ToScreenCoordinate(c, pos.X),
+			scale.ToScreenCoordinate(c, pos.Y),
+			scale.ToScreenCoordinate(c, pos.X+obj.Size().Width),
+			scale.ToScreenCoordinate(c, pos.Y+obj.Size().Height),
+		)
+		if !objBounds.Overlaps(region) {
+			return false
+		}
+
+		w := fyne.Min(clipPos.X+clipSize.Width, c.Size().Width)
+		h := fyne.Min(clipPos.Y+clipSize.Height, c.Size().Height)
+		clip := image.Rect(
+			scale.ToScreenCoordinate(c, clipPos.X),
+			scale.ToScreenCoordinate(c, clipPos.Y),
+			scale.ToScreenCoordinate(c, w),
+			scale.ToScreenCoordinate(c, h),
+		).Intersect(region)
+		if clip.Empty() {
+			return false
+		}
+		switch o := obj.(type) {
+		case *canvas.Image:
+			drawImage(c, o, pos, base, clip)
+		case *canvas.Text:
+			drawText(c, o, pos, base, clip)
+		case gradient:
+			drawGradient(c, o, pos, base, clip)
+		case *canvas.Circle:
+			drawCircle(c, o, pos, base, clip)
+		case *canvas.Line:
+			drawLine(c, o, pos, base, clip)
+		case *canvas.RegularPolygon:
+			drawPolygon(c, o, pos, base, clip)
+		case *canvas.ArbitraryPolygon:
+			drawArbitraryPolygon(c, o, pos, base, clip)
+		case *canvas.Raster:
+			drawRaster(c, o, pos, base, clip)
+		case *canvas.Rectangle:
+			drawRectangle(c, o, pos, base, clip)
+		case *canvas.Blur:
+			drawBlur(c, o, pos, base, clip)
+		case *canvas.Arc:
+			drawArc(c, o, pos, base, clip)
+		case *canvas.BezierCurve:
+			drawBezierCurve(c, o, pos, base, clip)
+		case *canvas.Ellipse:
+			drawEllipse(c, o, pos, base, clip)
+		}
+
+		return false
+	}
+
+	driver.WalkVisibleObjectTree(c.Content(), paint, nil)
+	for _, o := range c.Overlays().List() {
+		driver.WalkVisibleObjectTree(o, paint, nil)
+	}
+}
